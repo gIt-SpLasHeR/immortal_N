@@ -98,14 +98,14 @@ jobs:
         ls -lhR openwrt/bin/targets/ || true
         echo "===== 匹配 *.tar.gz ====="
         ls -lh openwrt/bin/targets/*/*/*.tar.gz 2>/dev/null || echo "无 *.tar.gz"
-        echo "===== 匹配 *rootfs.tar.gz（packit 实际使用）====="
-        ls -lh openwrt/bin/targets/*/*/*rootfs.tar.gz 2>/dev/null || echo "无 *rootfs.tar.gz"
+        echo "===== 匹配 *generic-rootfs.tar.gz（packit 实际使用，应只有 1 个）====="
+        ls -lh openwrt/bin/targets/*/*/*generic-rootfs.tar.gz 2>/dev/null || echo "无 *generic-rootfs.tar.gz"
 
     - name: 打包镜像文件
       if: ${{ env.compile_status }} == 'success' && !cancelled()
       uses: unifreq/openwrt_packit@master
       env:
-        OPENWRT_ARMVIRT: openwrt/bin/targets/*/*/*rootfs.tar.gz
+        OPENWRT_ARMVIRT: openwrt/bin/targets/*/*/*generic-rootfs.tar.gz
         KERNEL_VERSION_NAME: 6.12.y
         PACKAGE_SOC: s905d
         GZIP_IMGS: .xz
