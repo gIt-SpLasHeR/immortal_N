@@ -91,6 +91,16 @@ jobs:
         make -j$(nproc) || make -j1 || make -j1 V=s
         echo "compile_status=success" >> $GITHUB_ENV
 
+    - name: 列出编译产物
+      if: ${{ env.compile_status }} == 'success' && !cancelled()
+      run: |
+        echo "===== bin/targets 目录树 ====="
+        ls -lhR openwrt/bin/targets/ || true
+        echo "===== 匹配 *.tar.gz ====="
+        ls -lh openwrt/bin/targets/*/*/*.tar.gz 2>/dev/null || echo "无 *.tar.gz"
+        echo "===== 匹配 *rootfs.tar.gz（packit 实际使用）====="
+        ls -lh openwrt/bin/targets/*/*/*rootfs.tar.gz 2>/dev/null || echo "无 *rootfs.tar.gz"
+
     - name: 打包镜像文件
       if: ${{ env.compile_status }} == 'success' && !cancelled()
       uses: unifreq/openwrt_packit@master
