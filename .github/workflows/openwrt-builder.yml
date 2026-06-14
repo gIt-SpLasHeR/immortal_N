@@ -115,53 +115,11 @@ jobs:
         SFE_FLOW: 0
         ENABLE_WIFI_K510: 0
 
-    - name: 生成发布标签
+    - name: 上传固件到 Artifacts
       if: ${{ env.PACKAGED_STATUS == 'success' }} && !cancelled()
-      run: |
-        echo "release_tag=$(date +"%Y.%m.%d-%H.%M")" >> ${GITHUB_OUTPUT}
-        touch release.txt
-        echo "
-        🍁 注意事项：首次使用建议全新刷写
-          
-        💻 适用机型: 斐讯N1
-
-        📂 源码: ${{ env.REPO_URL }}
-
-        🌳 分支: ${{ env.REPO_BRANCH }}
-
-        ⏱️ 编译时间: $(date +"%Y年%m月%d日%H时%M分")
-
-        🌐 管理地址: 192.168.111.254
-
-        👤 用户名: root
-
-        🔒 密码: password 
-        
-        " >> release.txt
-        echo "tag_status=success" >> $GITHUB_ENV
-
-    - name: 发布固件到 Releases
-      uses: softprops/action-gh-release@v2
-      if: ${{ env.tag_status == 'success' }} && !cancelled()
+      uses: actions/upload-artifact@v4
       with:
-        tag_name: OpenWrt_${{ env.PACKAGED_OUTPUTDATE }}
-        files: ${{ env.PACKAGED_OUTPUTPATH }}/*.img.xz
-        body_path: release.txt
-        token: ${{ env.GITHUB_TOKEN }}
-
-#    - name: 消息推送
-#      run: curl "https://api2.pushdeer.com/message/push?pushkey=${{ secrets.PUSHDEER_TOKEN }}&text=【Github Actions】OpenWrt-N1打包成功"
-
-    - name: 删除运行记录
-      uses: Mattraks/delete-workflow-runs@main
-      with:
-        retain_days: 1
-        keep_minimum_runs: 1
-        token: ${{ env.GITHUB_TOKEN }}
-
-    - name: 删除自动发布的旧固件
-      uses: dev-drprasad/delete-older-releases@master
-      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
-      with:
-        keep_latest: 2
-        delete_tags : true
+        name: immortalwrt-n1-s905d_${{ env.PACKAGED_OUTPUTDATE }}
+        path: ${{ env.PACKAGED_OUTPUTPATH }}/*.img.xz
+        if-no-files-found: error
+        retention-days: 7
